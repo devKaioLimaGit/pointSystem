@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    box-sizing: border-box;
+}
+
+body {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    background-image: url(https://cdn.pixabay.com/video/2023/08/11/175579-853849692_tiny.jpg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.title {
+    padding: 10px;
+    color: #fff;
+    font-size: 3vw; /* Tamanho relativo para responsividade */
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+    margin-bottom: 20px;
+    z-index: 1;
+    font-weight: 200;
+}
+
+.container {
+    width: 50%; /* Ajustado para ocupar mais espaço em telas menores */
+    height: auto; /* Altura automática */
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 40px;
+    justify-content: space-around;
+    position: relative;
+    z-index: 1;
+}
+
+.card {
+    flex: 1 1 150px; /* Flexível com base na largura do contêiner */
+    max-width: 150px; /* Limite máximo de largura */
+    height: 150px;
+    background-color: rgba(51, 51, 51, 0.8);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 40px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+    box-shadow: rgba(255, 255, 255, 0.4) 5px 5px, rgba(255, 255, 255, 0.3) 10px 10px, rgba(255, 255, 255, 0.2) 15px 15px, rgba(255, 255, 255, 0.1) 20px 20px, rgba(255, 255, 255, 0.05) 25px 25px;
+    transition: transform 1s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-50px);
+    box-shadow: rgba(255, 255, 255, 0.6) 5px 5px, rgba(255, 255, 255, 0.5) 10px 10px, rgba(255, 255, 255, 0.4) 15px 15px;
+}
+
+.mask {
+    width: 100%;
+    height: 100vh;
+    z-index: 0;
+    position: absolute;
+    opacity: 0.6;
+    background-color: black;
+}
+
+.label {
+    font-size: 20px;
+    color: #fff;
+    margin-top: 10px;
+    text-align: center;
+}
+
+a {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 20px;
+    background-color: #333;
+    color: white;
+    width: 50%;
+    min-width: 300px;
+    outline: none;
+    border: none;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    font-size: 28px;
+    font-weight: 600;
+    transition: transform 1s ease, box-shadow 0.3s ease;
+    box-shadow: rgba(255, 255, 255, 0.6) 5px 5px, rgba(255, 255, 255, 0.5) 10px 10px, rgba(255, 255, 255, 0.4) 15px 15px;
+}
+
+a:hover {
+    transform: translateY(-20px);
+    background-color: white;
+    font-weight: 300;
+    color: black;
+    box-shadow: rgba(0, 0, 0, 0.6) 5px 5px, rgba(0, 0, 0, 0.5) 10px 10px, rgba(0, 0, 0, 0.4) 15px 15px;
+}
+
+/* Media Queries para dispositivos menores */
+@media (max-width: 768px) {
+    .title {
+        font-size: 5vw; /* Ajusta o tamanho do título */
+    }
+
+    .card {
+        flex: 1 1 120px; /* Permite que o cartão encolha em telas menores */
+    }
+
+    a {
+        width: 70%; /* Aumenta a largura do botão em telas menores */
+    }
+}
+
+@media (max-width: 480px) {
+    .title {
+        font-size: 5vw; /* Tamanho ainda maior para dispositivos muito pequenos */
+    }
+
+    .card {
+        flex: 1 1 100px; /* Permite que os cartões sejam ainda menores */
+        height: 110px;
+    }
+
+    a {
+        font-size: 24px; /* Tamanho da fonte do botão reduzido */
+    }
+}

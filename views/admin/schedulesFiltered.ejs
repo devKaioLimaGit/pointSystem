@@ -1,0 +1,129 @@
+<%- include('../partials/header.ejs') %>
+<%- include('../partials/navbarAdm.ejs') %>
+
+<div class="container">
+    <br/>
+    <h4 style="color: #fff; text-align: center;">Horários dos Usuários</h4>
+    <form method="post" action="/admin/schedules/filter">
+        <h4 style="color: #fff;">Filtrar Usuários:</h4>
+        <br/>
+        <div style="display: flex; width: 100%; gap: 20px;">
+            <select name="userName" style="width: 100%; padding: 10px; border-radius: 10px; outline: none;">
+                <% users.forEach((user) => { %>
+                    <% if (user.name !== "ADMIN") { %>
+                        <option value="<%= user.name %>"><%= user.name.slice(0).toUpperCase() %> <%= user.surname.slice(0).toUpperCase()%></option>
+                    <% } %>
+                <% }) %>
+            </select>
+            <button class="btn btn-primary" type="submit">Pesquisar</button>
+        </div>
+    </form>
+    <br/>
+    <% if (selectedUser) { %>
+        <h4 style="color: #fff; text-align: center;">Horários de <%= selectedUser.name %> <%= selectedUser.surname %></h4>
+        <div class="responsive-table">
+            <table id="horariosTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Reajuste</th>
+                        <th>Data</th>
+                        <th>Entrada</th>
+                        <th>Saída</th>
+                        <th>Justificativa</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (hours && hours.length > 0) { %>
+                        <% hours.forEach(hour => { %>
+                            <tr>
+                                <td class="reajuste">
+                                    <% if (hour.request) { %>
+                                        Solicita Ajuste
+                                    <% } else { %>
+                                        Não Solicita Ajuste
+                                    <% } %>
+                                </td>
+                                <td><%= new Date(hour.createdAt).toLocaleDateString('pt-BR') %></td>
+                                <td><%= hour.prohibited %></td>
+                                <td><%= hour.exit %></td>
+                                <td><a class="btn btn-success" target="_blank" href="/admin/justify/<%= hour.id %>">Justificativa</a></td>
+                                <td>
+                                    <a class="btn btn-warning" href="/admin/adjustment/<%= hour.id %>">Ajustar</a>
+                                    <a class="btn btn-danger" href="/admin/deny/<%= hour.id %>">Negar</a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6">Nenhum horário encontrado para este usuário.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <button style="width: 100%;" class="btn btn-primary" onclick="exportToExcel()">Exportar para Excel</button>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../partials/footer.ejs') %>
+<style>
+    th, td{
+        text-align: center;
+    }
+    .responsive-table {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .responsive-table table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .responsive-table th, .responsive-table td {
+        word-wrap: break-word;
+    } 
+    .reajuste{
+       
+        font-size: 20px;
+        text-align: center;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.4/xlsx.full.min.js"></script>
+<script>
+    const reajustes = document.querySelectorAll(".reajuste");
+
+    reajustes.forEach(reajuste => {
+    // Verifica o texto dentro da célula .reajuste
+    const textoReajuste = reajuste.textContent.trim();
+
+    // Aplica estilos apenas se o texto for "Solicita Reajuste"
+    if (textoReajuste === "Solicita Ajuste") {
+        reajuste.setAttribute("data-status", "true"); // Definindo o atributo como "true"
+
+        // Verifica o valor do atributo data-status
+        const status = reajuste.getAttribute("data-status");
+
+        if (status === "true") {
+            reajuste.style.backgroundColor = "rgb(255, 255, 0)";
+            reajuste.style.color = "black";
+            reajuste.style.fontSize = "20px"; // Exemplo: definindo tamanho de fonte
+            reajuste.style.textAlign = "center"; // Exemplo: centralizando texto
+        }
+    }
+});
+
+    function exportToExcel() {
+        const filename = 'horarios_usuarios.xlsx';
+        const ws = XLSX.utils.table_to_sheet(document.getElementById('horariosTable'));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Horários');
+
+        // Salvar o arquivo
+        XLSX.writeFile(wb, filename);
+    }
+</script>

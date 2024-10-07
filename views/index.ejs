@@ -1,0 +1,36 @@
+<%- include('partials/header.ejs') %>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contagem Regressiva</title>
+    <link rel="stylesheet" href="/css/stylecountdown.css">
+</head>
+<body>
+    <h1 class="title">CONTAGEM REGRESSIVA PARA 2025:</h1>
+    <div class="container">
+        <div class="card" id="card-days">
+            <span class="days"></span>
+            <div class="label">Dias</div>
+        </div>
+        <div class="card" id="card-hours">
+            <span class="hours"></span>
+            <div class="label">Horas</div>
+        </div>
+        <div class="card" id="card-minutes">
+            <span class="minutes"></span>
+            <div class="label">Minutos</div>
+        </div>
+        <div class="card" id="card-seconds">
+            <span class="seconds"></span>
+            <div class="label">Segundos</div>
+        </div>
+    </div>
+
+    <a href="/login">BATER PONTO</a>
+    <div class="mask"></div>
+</body>
+<script src="/js/script.js"></script>
+</html>
+<%- include('partials/footer.ejs') %>

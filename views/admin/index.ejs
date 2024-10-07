@@ -1,0 +1,70 @@
+<%- include('../partials/header.ejs') %>
+<%- include('../partials/navbarAdm.ejs') %>
+<body>
+    <br/>
+    <h4 style="color: #fff; text-align: center;">USUÁRIOS CADASTRADOS</h4>
+    <br/>
+    <div class="container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Sobrenome</th>
+                    <th>CPF</th>
+                    <th>Email</th>
+                    <th>Função</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(user => { %>
+                    <tr>
+                        <td><%= user.id %></td>
+                        <td><%= user.name %></td>
+                        <td><%= user.surname %></td>
+                        <td><%= user.cpf %></td>
+                        <td><%= user.email %></td>
+                        <td><%= user.roles %></td>
+                        <td>
+                            <form action="/admin/update/<%= user.id %>" method="post" style="display: inline;">
+                                <button class="btn btn-warning">Editar</button>  
+                            </form>
+                               
+                                <a href="/admin/delete/<%=user.id%>" class="btn btn-danger apagar-tarefa">Excluir</a>
+                                <% if (user.isActive) { %>
+                                    <a href="/admin/toggle/<%= user.id %>" class="btn btn-primary toggle-status">Desativar</a>
+                                <% } else { %>
+                                    <a href="/admin/toggle/<%= user.id %>" class="btn btn-success toggle-status">Ativar</a>
+                                <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+<script>
+const apagaTarefas = document.querySelectorAll('.apagar-tarefa');
+apagaTarefas.forEach(apagaTarefa => {
+    apagaTarefa.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (confirm('Tem certeza que deseja apagar?')) {
+            window.location.href = apagaTarefa.href;
+        }
+    });
+});
+
+const toggleButtons = document.querySelectorAll('.toggle-status');
+toggleButtons.forEach(toggleButton => {
+    toggleButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (confirm('Tem certeza que deseja alterar o status do usuário?')) {
+            window.location.href = toggleButton.href;
+        }
+    });
+});
+</script>
+
+<%- include('../partials/footer.ejs') %>

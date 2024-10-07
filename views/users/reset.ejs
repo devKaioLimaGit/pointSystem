@@ -1,0 +1,33 @@
+<%- include('../partials/header.ejs') %>
+<%- include('../partials/navbar.ejs') %>
+
+<body>
+    <div class="container">
+        <hr>
+        <div class="card">
+            <div class="card-header" style="display: flex; flex-direction: column; align-items: center;">
+                <img src="/img/logo.png" alt="" width="40%" height="40%">
+            </div>
+            <div class="card-body">
+                <% if (message) { %>
+                    <div class="alert alert-info"><%= message %></div>
+                    <script>
+                        setTimeout(function(){
+                            window.location.href = "/";
+                        }, 2000);
+                    </script>
+                <% } %>
+                <% if (token) { %>
+                    <form action="/reset-password/<%= token %>" method="POST">
+                        <label for="password">Nova Senha:</label>
+                        <input style="margin: 10px 0px;" class="form-control" type="password" name="password" id="password" placeholder="Digite sua nova senha" required>
+                        <br>
+                        <button type="submit" class="btn btn-primary">Redefinir Senha</button>
+                    </form>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</body>
+
+<%- include('../partials/footer.ejs') %>

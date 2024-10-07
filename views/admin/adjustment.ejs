@@ -1,0 +1,27 @@
+<%- include('../partials/header.ejs') %>
+<%- include('../partials/navbarAdm.ejs') %>
+
+<body>
+    <div class="container">
+        <hr>
+        <div class="card">
+            <div class="card-header">
+                <h2>EDITAR HORÁRIO</h2>
+            </div>
+            <div class="card-body">
+                <form action="/admin/update/hour" method="post">
+                    <label>Entrada:</label>
+                    <input class="form-control" type="text" name="prohibited" value="<%= hours.prohibited %>" placeholder="Entrada">
+                    <br>
+                    <label>Saída:</label>
+                    <input class="form-control" type="text" name="exit" value="<%= hours.exit %>" placeholder="Saida">
+                    <br>
+                    <input type="hidden" value="<%= hours.id %>" name="id">
+                    <button class="btn btn-primary" type="submit">Salvar</button>
+                    <a href="/admin/schedules" class="btn btn-primary">Voltar</a>
+                </form>                
+            </div>
+        </div>
+    </div>
+</body>
+<%- include('../partials/footer.ejs') %>

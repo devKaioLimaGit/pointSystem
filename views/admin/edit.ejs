@@ -1,0 +1,63 @@
+<%- include('../partials/header.ejs') %>
+<%- include('../partials/navbarAdm.ejs') %>
+
+<body>
+    <div class="container">
+        <hr>
+        <div class="card">
+            <div class="card-header">
+                <h2>EDITAR USUÁRIO</h2>
+            </div>
+            <div class="card-body">
+                <form action="/admin/update" method="post">
+                    <label>Nome:</label>
+                    <input class="form-control" type="text" name="name" value="<%= user.name %>" placeholder="Nome" required>
+                    <br>
+                    <label>Sobrenome:</label>
+                    <input class="form-control" type="text" name="surname" value="<%= user.surname %>" placeholder="Sobrenome" required>
+                    <br>
+                    <label>Instituição:</label>
+                    <input class="form-control" type="text" name="institution" value="<%=user.institution%>" placeholder="Instituição">
+                    <br>
+                    <label>Curso:</label>
+                    <input class="form-control" type="text" name="course" value="<%=user.course%>" placeholder="Curso">
+                    <br>
+                    <label>Período do curso:</label>
+                    <input class="form-control" type="number" name="period" value="<%=user.period%>" placeholder="Período Curso">
+                    <br>
+                    <label>Tempo Contratual:</label>
+                    <div style="display: flex; justify-content: space-around; gap: 20px;">
+                        <input class="form-control" type="date" value="<%= user.prohibited %>" name="prohibited" placeholder="Inicio">
+                        <input class="form-control" type="date" value="<%= user.exit %>" name="exit" placeholder="Fim">
+                    </div>                                     
+                    <br>
+                    <label>CPF:</label>
+                    <input class="form-control" type="text" name="cpf" value="<%= user.cpf %>" placeholder="CPF" required>
+                    <br>
+                    <label>E-mail:</label>
+                    <input class="form-control" type="email" name="email" value="<%= user.email %>" placeholder="exemplo@email.com" required>
+                    <br>
+                    <label>Senha:</label>
+                    <input class="form-control" type="password" name="password" placeholder="Senha">
+                    <br>
+                    <label>Cargo:</label>
+                    <select class="form-control" name="roles" required>
+                        <option value="admin" <%= user.roles === 'admin' ? 'selected' : '' %>>Administrador</option>
+                        <option value="lowuser" <%= user.roles === 'lowuser' ? 'selected' : '' %>>Funcionário</option>
+                    </select>
+                    <br/>
+                    <label>Turno:</label>
+                    <select class="form-control" name="shift" required>
+                        <option value="Manhã" <%= user.shift === 'Manhã' ? 'selected' : '' %>>Manhã</option>
+                        <option value="Tarde" <%= user.shift === 'Tarde' ? 'selected' : '' %>>Tarde</option>
+                    </select>
+                    <br/>
+                    <input type="hidden" value="<%= user.id%>" name="id">
+                    <button class="btn btn-primary" type="submit">Atualizar</button>
+                </form>    
+            </div>
+        </div>
+    </div>
+</body>
+
+<%- include('../partials/footer.ejs') %>

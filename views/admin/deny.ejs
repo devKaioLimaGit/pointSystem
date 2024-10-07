@@ -1,0 +1,45 @@
+<%- include('../partials/header.ejs') %>
+<%- include('../partials/navbaruser.ejs') %>
+
+<div class="container">
+    <hr>
+    <div class="card">
+        <div class="card-header">
+            <h2>NEGAÇÃO DE CHAMADO</h2>
+        </div>
+        <div class="card-body">
+            <form action="/admin/deny/adjustment" method="post">
+                <textarea name="justify" class="tinymcs"></textarea>
+                <input type="hidden" name="id" value="<%=hour.id%>">
+                <br>
+                <button class="btn btn-primary" type="submit">Negar</button>
+            </form>                
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs') %>
+<script src="/tinymce/js/tinymce/tinymce.min.js"></script>
+<script>
+    tinymce.init({
+        language: "pt_BR",
+        selector: ".tinymcs",
+        plugins: [
+            "advlist",
+            "autolink",
+            "link",
+            "image",
+            "lists",
+            "preview",
+            "searchreplace",
+            "wordcount",
+            "fullscreen",
+            "insertdatetime",
+            "media",
+            "save",
+            "table",
+            "emoticons"
+        ]
+    });
+</script>
+<%- include('../partials/footer.ejs') %>

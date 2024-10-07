@@ -1,0 +1,142 @@
+<%- include('../partials/header.ejs') %>
+<%- include('../partials/navbaruser.ejs') %>
+
+<body>
+    <div class="container">
+        <hr>
+        <div class="card">
+            <div class="card-header" style="display:flex;gap:20px;">
+                <img src="/imgUsers/image-<%= user.id %>.jpg" class="img-thumbnail" alt="..." style="width:200px;height:200px;">
+                <div>
+                    <div style="display:flex;align-items:center; width: 1050px; justify-content: space-between; padding-right: 10px;">
+                        <% if (user.name && user.surname) { %>
+                            <h1><%= user.name %> <%= user.surname %></h1>
+                        <% } %>
+                        <% if (user.shift) { %>
+                            <h3>Turno: <%= user.shift %></h3>
+                        <% } %>
+                    </div>
+                    <% if (user.course) { %>
+                        <h4>Curso: <%= user.course %></h4>
+                    <% } %>
+                    <% if (user.prohibited && user.exit != 'undefined/undefined/') { %>
+                        <h4>Contrato: Entrada: <%= user.prohibited %> | Saída: <%= user.exit %></h4>
+                    <% } %>
+                    <% if (user.institution) { %>
+                        <h4>Instituição: <%= user.institution %></h4>
+                    <% } %>
+                </div>
+            </div>
+            <div class="card-body">
+                <% if (errorMessage) { %>
+                    <div class="alert alert-danger" role="alert">
+                        <%= errorMessage %>
+                    </div>
+                <% } %>
+                <h5>HISTÓRICO FILTRADO:</h5>
+                <% if (filteredHours.length === 0) { %>
+                    <p>Nenhum dado encontrado.</p>
+                <% } else { %>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Nome do Usuário</th>
+                                <th scope="col">Data</th>
+                                <th scope="col">Entrada</th>
+                                <th scope="col">Saída</th>
+                                <th scope="col">Solicitar Reajuste</th>
+                                <th scope="col">Solicitação Negada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% filteredHours.forEach(hour => { %>
+                                <tr>
+                                    <th scope="row"><%= hour.user.name %> <%= hour.user.surname %></th>
+                                    <td><%= hour.createdAtFormatted %></td>
+                                    <td><%= hour.prohibited %></td>
+                                    <td><%= hour.exit %></td>
+                                    <td>
+                                        <% if (hour.denied === false) { %> <!-- Verifica se a solicitação não foi negada -->
+                                            <a href="/user/<%= hour.user.name.toLowerCase() %>/justify/<%= hour.id %>" class="btn btn-success">Justificar</a>
+                                            <% if (hour.request) { %>
+                                                <button class="btn btn-warning request-button" data-id="<%= hour.id %>" disabled>Solicitado</button>
+                                            <% } else { %>
+                                                <button class="btn btn-warning request-button" data-id="<%= hour.id %>">Solicitar</button>
+                                            <% } %>
+                                        <% } else { %> <!-- Caso a solicitação seja negada -->
+                                            <span>Solicitação Negada</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (hour.denied !== false) { %> <!-- Verifica se a solicitação foi negada -->
+                                            <a href="/user/<%= user.name.toLowerCase() %>/justify/denied/<%=hour.id%>" target="_blank" class="btn btn-danger">Ver Justificativa</a>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                    
+                    
+                <% } %>
+            </div>
+            <a href="/user/<%= user.name.toLowerCase() %>" class="btn btn btn-primary" style="margin: 20px;">Voltar</a>
+        </div>
+    </div>
+</body>
+
+<%- include('../partials/footer.ejs') %>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Seleciona todos os botões de solicitação de reajuste
+        const requestButtons = document.querySelectorAll(".request-button");
+
+        // Adiciona event listener para os botões de solicitação de reajuste
+        requestButtons.forEach((button) => {
+            button.addEventListener("click", function () {
+                if (!this.disabled) {
+                    const valor = this.getAttribute("data-id");
+                    const parent = this.parentElement;
+
+                    // Marca o botão como solicitado
+                    this.textContent = "Solicitado";
+                    this.classList.remove("btn-danger");
+                    this.classList.add("btn-success");
+                    this.disabled = true;
+
+                    // Envia solicitação para o servidor
+                    fetch('/user/hours/request', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ hourId: valor })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            alert("Failed to update request");
+                            // Revert changes if server update fails
+                            this.textContent = "Solicitar";
+                            this.classList.remove("btn-success");
+                            this.classList.add("btn-danger");
+                            this.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert("Failed to update request");
+                        // Revert changes if there's an error
+                        this.textContent = "Solicitar";
+                        this.classList.remove("btn-success");
+                        this.classList.add("btn-danger");
+                        this.disabled = false;
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+<%- include('../partials/footer.ejs') %>

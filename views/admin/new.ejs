@@ -1,0 +1,65 @@
+<%- include('../partials/header.ejs') %>
+<%- include('../partials/navbarAdm.ejs') %>
+
+<body>
+    <div class="container">
+        <hr>
+        <div class="card">
+            <div class="card-header">
+                <h2>CRIAR NOVO USUÁRIO</h2>
+            </div>
+            <div class="card-body">
+                <form action="/admin/save/new" method="post" enctype="multipart/form-data">
+                    <label>Nome:</label>
+                    <input class="form-control" type="text" name="name" placeholder="Nome" required>
+                    <br>
+                    <label>Sobrenome:</label>
+                    <input class="form-control" type="text" name="surname" placeholder="Sobrenome" required>
+                    <br>
+                    <label>Instituição:</label>
+                    <input class="form-control" type="text" name="institution" placeholder="Instituição">
+                    <br>
+                    <label>Curso:</label>
+                    <input class="form-control" type="text" name="course" placeholder="Curso">
+                    <br>
+                    <label>Período do curso:</label>
+                    <input class="form-control" type="number" name="period" placeholder="Período Curso">
+                    <br>
+                    <label>Tempo Contratual:</label>
+                    <div style="display: flex; justify-content: space-around; gap: 20px;">
+                        <input class="form-control" type="date" name="prohibited" placeholder="Inicio">
+                        <input class="form-control" type="date" name="exit" placeholder="Fim">
+                    </div>
+                    <br>
+                    <label>CPF:</label>
+                    <input class="form-control" type="text" name="cpf" placeholder="CPF" required>
+                    <br>
+                    <label>E-mail:</label>
+                    <input class="form-control" type="email" name="email" placeholder="exemplo@email.com" required>
+                    <br>
+                    <label>Senha:</label>
+                    <input class="form-control" type="password" name="password" placeholder="Senha" required>
+                    <br>
+                    <label>Imagem:</label>
+                    <input class="form-control" type="file" name="image" placeholder="" required>
+                    <br>
+                    <label>Cargo:</label>
+                    <select class="form-control" name="roles" required>
+                        <option value="admin">Administrador</option>
+                        <option value="lowuser">Funcionário</option>
+                    </select>
+                    <br/>
+                    <label>Turno:</label>
+                    <select class="form-control" name="shift" required>
+                        <option value="Manhã">Manhã</option>
+                        <option value="Tarde">Tarde</option>
+                    </select>
+                    <br/>
+                    <button class="btn btn-primary" type="submit">Cadastrar</button>
+                </form>                
+            </div>
+        </div>
+
+    </div>
+</body>
+<%- include('../partials/footer.ejs') %>

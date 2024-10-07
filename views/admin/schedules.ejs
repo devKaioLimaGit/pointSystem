@@ -1,0 +1,21 @@
+<%- include('../partials/header.ejs') %>
+<%- include('../partials/navbarAdm.ejs') %>
+<div class="container">
+    <br/>
+    <h4 style="color: #fff; text-align: center;">Horários dos Usuários</h4>
+    <form method="post" action="/admin/schedules/filter">
+        <h4 style="color: #fff;">Filtrar Usuários:</h4>
+        <br/>
+        <div style="display: flex; width: 100%; gap: 20px;">
+            <select name="userName" style="width: 100%; padding: 10px; border-radius: 10px; outline: none;">
+                <% users.forEach((user) => { %>
+                    <% if (user.name !== "ADMIN") { %>
+                        <option value="<%= user.name %>"><%= user.name.slice(0).toUpperCase() %> <%= user.surname.slice(0).toUpperCase()%></option>
+                    <% } %>
+                <% }) %>
+            </select>
+            <button class="btn btn-primary" type="submit">Pesquisar</button>
+        </div>
+    </form>
+</div>
+<%- include('../partials/footer.ejs') %>

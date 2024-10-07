@@ -1,0 +1,43 @@
+<%- include('../partials/header.ejs') %>
+<%- include('../partials/navbarAdm.ejs') %>
+
+<body>
+    <br/>
+    <h4 style="color: #fff; text-align: center;">SOLICITAÇÃO DE AJUSTE</h4>
+    <br/>
+    <div class="container">
+        <% if (requests.length > 0) { %>
+            <table id="horariosTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Data</th>
+                        <th>Entrada</th>
+                        <th>Saída</th>
+                        <th>Justificativa</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% requests.forEach((request) => { %>
+                        <tr>
+                            <td><%= request.user.name %> <%= request.user.surname %></td>
+                            <td><%=new Date(request.createdAt).toLocaleDateString('pt-BR') %></td>
+                            <td><%= request.prohibited %></td>
+                            <td><%= request.exit %></td>
+                            <td><a class="btn btn-success" target="_blank" href="/admin/justify/<%= request.id %>">Justificativa</a></td>
+                            <td>
+                                <a class="btn btn-warning" href="/admin/adjustment/<%= request.id %>">Ajustar</a>
+                                <a class="btn btn-danger" href="/admin/deny/<%= request.id %>">Negar</a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <h5 style="color: #fff; text-align: center;">Não tem solicitação</p>
+        <% } %>
+    </div>
+</body>
+
+<%- include('../partials/footer.ejs') %>
