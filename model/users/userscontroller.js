@@ -5,20 +5,86 @@ const bcryptjs = require("bcryptjs");
 const Hours = require("../hours/Hours.js");
 const { Op, where } = require("sequelize");
 const adminAuth = require("../../middlewares/adminAuth.js");
+const multer = require("multer");
+const path = require("path");
 const { format } = require("date-fns"); // Adicione a biblioteca date-fns para formatação de data
+const { id } = require("date-fns/locale");
+const fs = require("fs"); // Corrige o erro de 'fs' não definido
 
-router.get(
-  "/:fullname/justify/denied/:id",
-  adminAuth.authenticateLogin,
-  adminAuth.authenticateLowUser,
-  async (req, res) => {
-    const { id } = req.params;
-    const hour = await Hours.findByPk(id);
-    res.render("users/justifyDenied.ejs", {
-      justifydenied: hour.justifydenied,
-    });
+// Caminho do diretório de uploads
+const uploadDir = path.join(__dirname, "../../public/uploads");
+
+// Verifique se o diretório existe e, se não, crie-o
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configuração de armazenamento para multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Gera um nome único para evitar conflitos
+    const uniqueSuffix = Date.now() + path.extname(file.originalname);
+    cb(null, uniqueSuffix);
+  },
+});
+
+// Filtro para aceitar apenas imagens
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Apenas imagens são permitidas!"), false);
   }
-);
+};
+
+// Configuração do upload com multer
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+});
+
+// Rota para atualizar o usuário
+router.post("/update", upload.single("image"), async (req, res) => {
+  const id = req.body.id;
+
+  try {
+    // Busca o usuário no banco de dados pelo ID
+    const user = await Users.findByPk(id);
+    if (!user) {
+      return res.status(404).send("Usuário não encontrado.");
+    }
+
+    // Verifica se um arquivo de imagem foi enviado
+    if (req.file) {
+      const oldImageName = user.image;
+      const oldImagePath = path.join(uploadDir, oldImageName);
+
+      // Verifica se há uma imagem antiga para ser deletada
+      if (oldImageName) {
+        try {
+          await fs.promises.unlink(oldImagePath);
+          console.log("Imagem antiga deletada com sucesso.");
+        } catch (err) {
+          console.error("Erro ao deletar a imagem antiga:", err);
+        }
+      }
+
+      // Atualiza o campo de imagem no banco de dados
+      user.image = req.file.filename; // Atualiza com o novo nome
+      await user.save(); // Salva as alterações no banco de dados
+      console.log("Nome da nova imagem atualizado no banco de dados.");
+    }
+
+    res.redirect(`/user/${user.name.toLowerCase()}`);
+  } catch (error) {
+    console.error("Erro ao atualizar usuário:", error);
+    res.status(500).send("Erro ao atualizar usuário.");
+  }
+});
+
 
 router.get(
   "/:fullname/justify/:id",
@@ -37,6 +103,21 @@ router.get(
       console.log(error);
       res.status(500).send("Error fetching record");
     }
+  }
+);
+
+
+
+router.get(
+  "/:fullname/justify/denied/:id",
+  adminAuth.authenticateLogin,
+  adminAuth.authenticateLowUser,
+  async (req, res) => {
+    const { id } = req.params;
+    const hour = await Hours.findByPk(id);
+    res.render("users/justifyDenied.ejs", {
+      justifydenied: hour.justifydenied,
+    });
   }
 );
 
@@ -66,12 +147,17 @@ router.post(
   async (req, res) => {
     const { date } = req.body;
     const userId = req.session.user.id;
+    const user = await Users.findOne({ where: { id: userId } });
 
+    if (!user) {
+      return res.status(404).send("Usuário não encontrado.");
+    }
     if (!date) {
       return res.status(400).render("users/filtro.ejs", {
         errorMessage: "Por favor, selecione uma data para filtrar.",
         filteredHours: [],
         user: req.session.user,
+        image: user.image,
       });
     }
 
@@ -113,6 +199,7 @@ router.post(
         user: req.session.user,
         errorMessage:
           formattedHours.length === 0 ? "Nenhum dado encontrado." : null,
+        image: user.image,
       });
     } catch (error) {
       console.error("Erro ao buscar os dados:", error);

@@ -1,306 +1,377 @@
-<%- include('../partials/header.ejs') %>
-    <%- include('../partials/navbaruser.ejs') %>
+<%- include('../partials/header.ejs') %> <%-
+include('../partials/navbaruser.ejs') %>
 
-    <body>
-        <div class="container">
-            <hr>
-            <div class="card" style="overflow: hidden;">
-                <div class="card-header" style="display:flex;gap:20px;">
-                    <img src="/imgUsers/image-<%= user.id %>.jpg" class="img-thumbnail" alt="..."
-                        style="width:200px;height:200px;">
-                    <div>
-                        <div class="description">
-                            <% if (user.name && user.surname) { %>
-                                <h1><%= user.name %> <%= user.surname %></h1>
-                            <% } %>
-                            <% if (user.shift) { %>
-                                <h3>Turno: <%= user.shift %></h3>
-                            <% } %>
-                        </div>
-                        <% if (user.course) { %>
-                            <h4>Curso: <%= user.course %></h4>
-                        <% } %>
-                        <% if (user.prohibited && user.exit != 'undefined/undefined/' && user.prohibited && user.exit != 'Invalid date') { %>
-                            <h4>Contrato: Entrada: <%= user.prohibited %> | Saída: <%= user.exit %></h4>
-                        <% } %>
-                        <% if (user.institution) { %>
-                            <h4>Instituição: <%= user.institution %></h4>
-                        <% } %>
-                        <div style="width: 100%; gap: 10px; display: flex; align-items: center;">
-                            <h4>Horário:</h4>
-                            <h4 id="modelHours"></h4>
-                        </div>
-                        <h4 class="entrada"></h4>
-                        <h4 class="saida"></h4>
-                        <button class="btn btn-primary" id="entradaButton">Entrada</button>
-                        <button class="btn btn-primary" id="saidaButton">Saída</button>
-                        <form id="timeForm" method="POST" action="/user/save/time" style="display:inline;">
-                            <input type="hidden" id="entradaTime" name="entradaTime_<%= user.id %>">
-                            <input type="hidden" id="saidaTime" name="saidaTime_<%= user.id %>">
-                        </form>
-                    </div>
-                </div>
-                <div class="card-body">
-                        <hr>
-                        <form method="post" action="/user/<%= user.name.toLowerCase() %>/filter">
-                            <h5>FILTRO DE DIAS</h5>
-                            <br />
-                            <div style="display: flex; gap: 20px;">
-                                <input class="form-control" id="date" type="date" name="date"
-                                    style="width: 100%; display: block; padding: 10px;" />
-                                <button class="btn btn-primary" type="submit">Filtrar</button>
-                            </div>
-                        </form>
-                        <br />
-                        <hr>
-                        <h5>HISTÓRICO:</h5>
-                        <div class="response">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col" class="table-description">Nome do Usuário</th>
-                                    <th scope="col" class="table-description">Data</th>
-                                    <th scope="col" class="table-description">Entrada</th>
-                                    <th scope="col" class="table-description">Saída</th>
-                                    <th scope="col" class="table-description">Solicitar Reajuste</th>
-                                    <th scope="col" class="table-description">Solicitação Negada</th>
-                                </tr>
-                            </thead>
-                            <tbody class="body-table">
-                                <% hours.forEach(hour => { %>
-                                    <tr>
-                                        <th scope="row" class="table-information">
-                                            <%= hour.user.name %> <%= hour.user.surname %>
-                                        </th>
-                                        <td class="table-information">
-                                            <%= hour.formattedDate %>
-                                        </td>
-                                        <td class="table-information">
-                                            <%= hour.prohibited %>
-                                        </td>
-                                        <td class="table-information">
-                                            <%= hour.exit %>
-                                        </td>
-                                        <td class="container-action">
-                                            <% if (hour.denied === false) { %> <!-- Verifica se a solicitação não foi negada -->
-                                                <a href="/user/<%= hour.user.name.toLowerCase() %>/justify/<%= hour.id %>" class="btn btn-success" id="button-action">Justificar</a>
-                                                <% if (hour.request) { %>
-                                                    <button class="btn btn-warning request-button" data-id="<%= hour.id %>"  id="button-action" disabled>Solicitado</button>
-                                                <% } else { %>
-                                                    <button class="btn btn-warning request-button" data-id="<%= hour.id %>"  id="button-action">Solicitar</button>
-                                                <% } %>
-                                            <% } else { %> <!-- Caso a solicitação seja negada -->
-                                                <span>Solicitação Negada</span>
-                                            <% } %>
-                                        </td>
-                                        <td>
-                                            <% if (hour.denied !== false) { %> <!-- Verifica se a solicitação foi negada -->
-                                                <a href="/user/<%= user.name.toLowerCase() %>/justify/denied/<%= hour.id %>" target="_blank" class="btn btn-danger">Ver Justificativa</a>
-                                            <% } %>
-                                            <input class="idAtual" type="hidden" value="<%=hour.id%>">
-                                        </td>
-                                    </tr>
-                                <% }) %>
-                            </tbody>
-                        </table>
-                    </div>
-                        
-                    </div>
-                </div>
-            </div>
-        </body>
+<body>
+  <div class="container">
+    <hr />
+    <div class="card" style="overflow: hidden">
+      <div class="card-header" style="display: flex; gap: 20px">
+        <form action="/user/update" method="post" enctype="multipart/form-data">
+          <div
+            class="image-upload-wrapper">
+            <!-- Imagem atual do usuário -->
+            <img
+            src="<%= user.image ? '/uploads/' + user.image : '/public/uploads/default-image.png' %>"
+              class="img-thumbnail"
+              alt="Imagem do usuário"
+              style="width: 200px; height: 200px; object-fit: cover"
+            />
+            <input type="hidden" value="<%= user.id %>" name="id" />
+            <!-- Input de file invisível sobreposto à imagem -->
+            <input
+              type="file"
+              name="image"
+              style="
+                opacity: 0;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                cursor: pointer;
+              "
+              title="Clique para alterar a imagem"
+            />
+          </div>
+          <!-- Botão de envio -->
+          <button type="submit" class="btn btn-primary mt-3">
+            Clique Depois de Anexa a Foto
+          </button>
+        </form>
+        <div>
+          <div class="description">
+            <% if (user.name && user.surname) { %>
+            <h1><%= user.name %> <%= user.surname %></h1>
+            <% } %> <% if (user.shift) { %>
+            <h3>Turno: <%= user.shift %></h3>
+            <% } %>
+          </div>
+          <% if (user.course) { %>
+          <h4>Curso: <%= user.course %></h4>
+          <% } %> <% if (user.prohibited && user.exit != 'undefined/undefined/'
+          && user.prohibited && user.exit != 'Invalid date') { %>
+          <h4>
+            Contrato: Entrada: <%= user.prohibited %> | Saída: <%= user.exit %>
+          </h4>
+          <% } %> <% if (user.institution) { %>
+          <h4>Instituição: <%= user.institution %></h4>
+          <% } %>
+          <div
+            style="width: 100%; gap: 10px; display: flex; align-items: center"
+          >
+            <h4>Horário:</h4>
+            <h4 id="modelHours"></h4>
+          </div>
+          <h4 class="entrada"></h4>
+          <h4 class="saida"></h4>
+          <button class="btn btn-primary" id="entradaButton">Entrada</button>
+          <button class="btn btn-primary" id="saidaButton">Saída</button>
+          <form
+            id="timeForm"
+            method="POST"
+            action="/user/save/time"
+            style="display: inline"
+          >
+            <input
+              type="hidden"
+              id="entradaTime"
+              name="entradaTime_<%= user.id %>"
+            />
+            <input
+              type="hidden"
+              id="saidaTime"
+              name="saidaTime_<%= user.id %>"
+            />
+          </form>
+        </div>
+      </div>
+      <div class="card-body">
+        <hr />
+        <form
+          method="post"
+          action="/user/<%= user.name.toLowerCase() %>/filter"
+        >
+          <h5>FILTRO DE DIAS</h5>
+          <br />
+          <div style="display: flex; gap: 20px">
+            <input
+              class="form-control"
+              id="date"
+              type="date"
+              name="date"
+              style="width: 100%; display: block; padding: 10px"
+            />
+            <button class="btn btn-primary" type="submit">Filtrar</button>
+          </div>
+        </form>
+        <br />
+        <hr />
+        <h5>HISTÓRICO:</h5>
+        <div class="response">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col" class="table-description">Nome do Usuário</th>
+                <th scope="col" class="table-description">Data</th>
+                <th scope="col" class="table-description">Entrada</th>
+                <th scope="col" class="table-description">Saída</th>
+                <th scope="col" class="table-description">
+                  Solicitar Reajuste
+                </th>
+                <th scope="col" class="table-description">
+                  Solicitação Negada
+                </th>
+              </tr>
+            </thead>
+            <tbody class="body-table">
+              <% hours.forEach(hour => { %>
+              <tr>
+                <th scope="row" class="table-information">
+                  <%= hour.user.name %> <%= hour.user.surname %>
+                </th>
+                <td class="table-information"><%= hour.formattedDate %></td>
+                <td class="table-information"><%= hour.prohibited %></td>
+                <td class="table-information"><%= hour.exit %></td>
+                <td class="container-action">
+                  <% if (hour.denied === false) { %>
+                  <!-- Verifica se a solicitação não foi negada -->
+                  <a
+                    href="/user/<%= hour.user.name.toLowerCase() %>/justify/<%= hour.id %>"
+                    class="btn btn-success"
+                    id="button-action"
+                    >Justificar</a
+                  >
+                  <% if (hour.request) { %>
+                  <button
+                    class="btn btn-warning request-button"
+                    data-id="<%= hour.id %>"
+                    id="button-action"
+                    disabled
+                  >
+                    Solicitado
+                  </button>
+                  <% } else { %>
+                  <button
+                    class="btn btn-warning request-button"
+                    data-id="<%= hour.id %>"
+                    id="button-action"
+                  >
+                    Solicitar
+                  </button>
+                  <% } %> <% } else { %>
+                  <!-- Caso a solicitação seja negada -->
+                  <span>Solicitação Negada</span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (hour.denied !== false) { %>
+                  <!-- Verifica se a solicitação foi negada -->
+                  <a
+                    href="/user/<%= user.name.toLowerCase() %>/justify/denied/<%= hour.id %>"
+                    target="_blank"
+                    class="btn btn-danger"
+                    >Ver Justificativa</a
+                  >
+                  <% } %>
+                  <input class="idAtual" type="hidden" value="<%=hour.id%>" />
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
 
-        <%- include('../partials/footer.ejs') %>
+<%- include('../partials/footer.ejs') %>
 
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    const requestButtons = document.querySelectorAll(".request-button");
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const requestButtons = document.querySelectorAll(".request-button");
 
-                    requestButtons.forEach(button => {
-                        button.addEventListener("click", function () {
-                            const hourId = this.getAttribute("data-id");
+    requestButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const hourId = this.getAttribute("data-id");
 
-                            fetch('/user/hours/request', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({ hourId: hourId })
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        alert("SOLICITAÇÃO ABERTA COM SUCESSO!");
-                                        this.textContent = "Solicitado";
-                                        this.classList.remove("btn-warning");
-                                        this.classList.add("btn-warning");
-                                        this.disabled = true;
-                                    } else {
-                                        alert("Failed to update request");
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                });
-                        });
-                    });
-                });
+        fetch("/user/hours/request", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ hourId: hourId }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              alert("SOLICITAÇÃO ABERTA COM SUCESSO!");
+              this.textContent = "Solicitado";
+              this.classList.remove("btn-warning");
+              this.classList.add("btn-warning");
+              this.disabled = true;
+            } else {
+              alert("Failed to update request");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      });
+    });
+  });
 
+  const h1 = document.querySelector("#modelHours"),
+    entradaElement = document.querySelector(".entrada"),
+    saidaElement = document.querySelector(".saida"),
+    entradaButton = document.getElementById("entradaButton"),
+    saidaButton = document.getElementById("saidaButton"),
+    userId = "<%= user.id %>";
+  const idElement = document.querySelector(".idAtual");
+  const idAtual = idElement ? idElement.value : null;
 
-                const h1 = document.querySelector("#modelHours"),
-                    entradaElement = document.querySelector(".entrada"),
-                    saidaElement = document.querySelector(".saida"),
-                    entradaButton = document.getElementById("entradaButton"),
-                    saidaButton = document.getElementById("saidaButton"),
-                    userId = "<%= user.id %>";
-                    const idElement = document.querySelector(".idAtual");
-                    const idAtual = idElement ? idElement.value : null;
+  function getCurrentTime() {
+    const date = new Date(),
+      hours = date.getHours(),
+      minutes = date.getMinutes();
 
-                    
-                function getCurrentTime() {
-                    const date = new Date(),
-                        hours = date.getHours(),
-                        minutes = date.getMinutes();
+    const formattedHours = hours < 10 ? `0${hours}` : hours;
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
 
-                    const formattedHours = hours < 10 ? `0${hours}` : hours;
-                    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+    return `${formattedHours}:${formattedMinutes}`;
+  }
 
-                    return `${formattedHours}:${formattedMinutes}`;
-                }
+  function updateClock() {
+    const currentTime = getCurrentTime();
+    h1.innerText = currentTime;
+  }
 
-                function updateClock() {
-                    const currentTime = getCurrentTime();
-                    h1.innerText = currentTime;
-                }
+  entradaButton.addEventListener("click", function () {
+    const currentTime = getCurrentTime();
+    const modal = createModal("Entrada registrada");
+    modal.style.display = "block";
 
-                entradaButton.addEventListener("click", function () {
-                    const currentTime = getCurrentTime();
-                    const modal = createModal("Entrada registrada");
-                    modal.style.display = "block";
+    const okButton = modal.querySelector("button");
 
-                    const okButton = modal.querySelector("button");
-                    
-                    okButton.addEventListener("click", function () {
-                        modal.style.display = "none";
-                        entrada(currentTime);
-                        setTimeout(() => {
-                            window.location.href = '/logout';
-                        }, 1000);
-                    });
-                });
+    okButton.addEventListener("click", function () {
+      modal.style.display = "none";
+      entrada(currentTime);
+      setTimeout(() => {
+        window.location.href = "/logout";
+      }, 1000);
+    });
+  });
 
-                saidaButton.addEventListener("click", function () {
-                    const currentTime = getCurrentTime();
-                    const modal = createModal("Saída registrada");
-                    modal.style.display = "block";
+  saidaButton.addEventListener("click", function () {
+    const currentTime = getCurrentTime();
+    const modal = createModal("Saída registrada");
+    modal.style.display = "block";
 
-                    const okButton = modal.querySelector("button");
+    const okButton = modal.querySelector("button");
 
-                    okButton.addEventListener("click", function () {
-                        modal.style.display = "none";
-                        saida(currentTime);
-                        setTimeout(() => {
-                            window.location.href = '/logout';
-                        }, 1000);
-                    });
-                });
+    okButton.addEventListener("click", function () {
+      modal.style.display = "none";
+      saida(currentTime);
+      setTimeout(() => {
+        window.location.href = "/logout";
+      }, 1000);
+    });
+  });
 
-                function createModal(message) {
-                    const modal = document.createElement("div");
-                    modal.classList.add("modal");
+  function createModal(message) {
+    const modal = document.createElement("div");
+    modal.classList.add("modal");
 
-                    const modalContent = document.createElement("div");
-                    modalContent.classList.add("modal-content");
+    const modalContent = document.createElement("div");
+    modalContent.classList.add("modal-content");
 
-                    const messageElement = document.createElement("p");
-                    messageElement.textContent = message;
+    const messageElement = document.createElement("p");
+    messageElement.textContent = message;
 
-                    const okButton = document.createElement("button");
-                    okButton.textContent = "OK";
+    const okButton = document.createElement("button");
+    okButton.textContent = "OK";
 
-                    modalContent.appendChild(messageElement);
-                    modalContent.appendChild(okButton);
-                    modal.appendChild(modalContent);
-                    document.body.appendChild(modal);
+    modalContent.appendChild(messageElement);
+    modalContent.appendChild(okButton);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
 
-                    return modal;
-                }
+    return modal;
+  }
 
-                function entrada (entradaTime) {
-                    fetch('/user/save/time', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            entradaTime: entradaTime,
-                            userId: userId
-                        })
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Erro ao salvar horário');
-                            }
-                            return response.json();
-                        })
-                }
+  function entrada(entradaTime) {
+    fetch("/user/save/time", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        entradaTime: entradaTime,
+        userId: userId,
+      }),
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error("Erro ao salvar horário");
+      }
+      return response.json();
+    });
+  }
 
-                function saida(saidaTime) {
-                    fetch(`/user/save/time`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            saidaTime: saidaTime,
-                            idAtual: idAtual
-                        })
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Erro ao salvar horário');
-                            }
-                            return response.json();
-                        })
-                }
-                setInterval(updateClock, 1000);
-            </script>
+  function saida(saidaTime) {
+    fetch(`/user/save/time`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        saidaTime: saidaTime,
+        idAtual: idAtual,
+      }),
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error("Erro ao salvar horário");
+      }
+      return response.json();
+    });
+  }
+  setInterval(updateClock, 1000);
+</script>
 
-            <style>
-                .modal {
-                    display: none;
-                    position: fixed;
-                    z-index: 1;
-                    left: 0;
-                    top: 0;
-                    width: 100%;
-                    height: 100%;
-                    overflow: auto;
-                    background-color: rgba(0, 0, 0, .4)
-                }
+<style>
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
 
-                .modal-content {
-                    background-color: #fefefe;
-                    margin: 15% auto;
-                    padding: 20px;
-                    border: 1px solid #888;
-                    width: 30%
-                }
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%;
+  }
 
-                .modal p {
-                    text-align: center;
-                    font-size: 18px;
-                    margin-bottom: 20px
-                }
+  .modal p {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
 
-                .modal button {
-                    display: block;
-                    margin: 0 auto;
-                    padding: 10px 20px;
-                    background-color: #4caf50;
-                    color: #fff;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer
-                }
-            </style>
+  .modal button {
+    display: block;
+    margin: 0 auto;
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+</style>

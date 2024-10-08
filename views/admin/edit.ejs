@@ -9,7 +9,7 @@
                 <h2>EDITAR USUÁRIO</h2>
             </div>
             <div class="card-body">
-                <form action="/admin/update" method="post">
+            <form action="/admin/update" method="post" enctype="multipart/form-data">
                     <label>Nome:</label>
                     <input class="form-control" type="text" name="name" value="<%= user.name %>" placeholder="Nome" required>
                     <br>
@@ -39,6 +39,9 @@
                     <br>
                     <label>Senha:</label>
                     <input class="form-control" type="password" name="password" placeholder="Senha">
+                    <br>
+                    <label>Imagem:</label>
+                    <input class="form-control" type="file" name="image" placeholder="" required>
                     <br>
                     <label>Cargo:</label>
                     <select class="form-control" name="roles" required>
