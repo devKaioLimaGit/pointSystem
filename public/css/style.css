@@ -13,6 +13,16 @@ body {
     width: 12px;
 }
 
+
+.image-upload-wrapper{
+    display: flex;
+    flex-direction: column;
+    position: relative; 
+    display: inline-block;
+}
+
+
+
 ::-webkit-scrollbar-thumb {
     background-color: #333;
     border: 3px solid white;
@@ -93,6 +103,7 @@ body {
     .description > h1, h3,h4{
         font-size: 16px;
     }
+
 
     .card-header{
         display: flex;

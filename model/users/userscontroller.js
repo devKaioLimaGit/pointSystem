@@ -11,15 +11,23 @@ const { format } = require("date-fns"); // Adicione a biblioteca date-fns para f
 const { id } = require("date-fns/locale");
 const fs = require("fs"); // Corrige o erro de 'fs' não definido
 
+// Caminho do diretório de uploads
+const uploadDir = path.join(__dirname, "../../public/uploads");
+
+// Verifique se o diretório existe e, se não, crie-o
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // Configuração de armazenamento para multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../../public/uploads"));
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    // Mantém o nome original, mas é aconselhável usar um timestamp para evitar conflitos
+    // Gera um nome único para evitar conflitos
     const uniqueSuffix = Date.now() + path.extname(file.originalname);
-    cb(null, uniqueSuffix); // Altera para `uniqueSuffix` para evitar conflitos
+    cb(null, uniqueSuffix);
   },
 });
 
@@ -40,7 +48,7 @@ const upload = multer({
 
 // Rota para atualizar o usuário
 router.post("/update", upload.single("image"), async (req, res) => {
-  const id = req.body.id; // Obtém o ID do usuário a partir do corpo da requisição
+  const id = req.body.id;
 
   try {
     // Busca o usuário no banco de dados pelo ID
@@ -51,44 +59,32 @@ router.post("/update", upload.single("image"), async (req, res) => {
 
     // Verifica se um arquivo de imagem foi enviado
     if (req.file) {
-      const oldImageName = user.image; // Obtém o nome da imagem antiga do banco de dados
-      const oldImagePath = path.join(
-        __dirname,
-        "../../public/uploads",
-        user.image
-      );
+      const oldImageName = user.image;
+      const oldImagePath = path.join(uploadDir, oldImageName);
 
       // Verifica se há uma imagem antiga para ser deletada
       if (oldImageName) {
         try {
-          await fs.promises.unlink(oldImagePath); // Deleta a imagem antiga
+          await fs.promises.unlink(oldImagePath);
           console.log("Imagem antiga deletada com sucesso.");
         } catch (err) {
           console.error("Erro ao deletar a imagem antiga:", err);
         }
       }
 
-      // Define o nome da nova imagem como original
-      const newImageName = req.file.filename; // Mantém o nome original da imagem
-
       // Atualiza o campo de imagem no banco de dados
-      user.image = newImageName; // Atualiza com o novo nome
+      user.image = req.file.filename; // Atualiza com o novo nome
       await user.save(); // Salva as alterações no banco de dados
       console.log("Nome da nova imagem atualizado no banco de dados.");
-
-      // Salva a nova imagem no diretório
-      const newImagePath = path.join(
-        __dirname,
-        "../../public/uploads",
-        newImageName
-      );
     }
+
     res.redirect(`/user/${user.name.toLowerCase()}`);
   } catch (error) {
     console.error("Erro ao atualizar usuário:", error);
     res.status(500).send("Erro ao atualizar usuário.");
   }
 });
+
 
 router.get(
   "/:fullname/justify/denied/:id",

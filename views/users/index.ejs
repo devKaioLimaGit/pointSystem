@@ -8,12 +8,10 @@ include('../partials/navbaruser.ejs') %>
       <div class="card-header" style="display: flex; gap: 20px">
         <form action="/user/update" method="post" enctype="multipart/form-data">
           <div
-            class="image-upload-wrapper"
-            style="position: relative; display: inline-block"
-          >
+            class="image-upload-wrapper">
             <!-- Imagem atual do usuário -->
             <img
-              src="/uploads/<%= user.image %>"
+            src="<%= user.image ? '/uploads/' + user.image : '/public/uploads/default-image.png' %>"
               class="img-thumbnail"
               alt="Imagem do usuário"
               style="width: 200px; height: 200px; object-fit: cover"
@@ -37,7 +35,7 @@ include('../partials/navbaruser.ejs') %>
           </div>
           <!-- Botão de envio -->
           <button type="submit" class="btn btn-primary mt-3">
-            Upload Image
+            Clique Depois de Anexa a Foto
           </button>
         </form>
         <div>
