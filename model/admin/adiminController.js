@@ -275,7 +275,8 @@ router.post("/save/new", upload.single("image"), async (req, res) => {
   }
 });
 
-router.get("/create/new", async (req, res) => {
+router.get("/create/new",   adminAuth.authenticateLogin,
+  adminAuth.authenticateLowUser, async (req, res) => {
   res.render("admin/new.ejs");
 });
 

@@ -87,6 +87,28 @@ router.post("/update", upload.single("image"), async (req, res) => {
 
 
 router.get(
+  "/:fullname/justify/:id",
+  adminAuth.authenticateLogin,
+  adminAuth.authenticateLowUser,
+  async (req, res) => {
+    const { id } = req.params;
+    try {
+      const hours = await Hours.findByPk(id);
+      if (hours) {
+        res.render("users/justify.ejs", { justify: hours });
+      } else {
+        res.status(404).send("Record not found");
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error fetching record");
+    }
+  }
+);
+
+
+
+router.get(
   "/:fullname/justify/denied/:id",
   adminAuth.authenticateLogin,
   adminAuth.authenticateLowUser,
