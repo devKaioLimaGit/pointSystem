@@ -5,7 +5,90 @@ const bcryptjs = require("bcryptjs");
 const Hours = require("../hours/Hours.js");
 const { Op, where } = require("sequelize");
 const adminAuth = require("../../middlewares/adminAuth.js");
+const multer = require("multer");
+const path = require("path");
 const { format } = require("date-fns"); // Adicione a biblioteca date-fns para formatação de data
+const { id } = require("date-fns/locale");
+const fs = require("fs"); // Corrige o erro de 'fs' não definido
+
+// Configuração de armazenamento para multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, "../../public/uploads"));
+  },
+  filename: function (req, file, cb) {
+    // Mantém o nome original, mas é aconselhável usar um timestamp para evitar conflitos
+    const uniqueSuffix = Date.now() + path.extname(file.originalname);
+    cb(null, uniqueSuffix); // Altera para `uniqueSuffix` para evitar conflitos
+  },
+});
+
+// Filtro para aceitar apenas imagens
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Apenas imagens são permitidas!"), false);
+  }
+};
+
+// Configuração do upload com multer
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+});
+
+// Rota para atualizar o usuário
+router.post("/update", upload.single("image"), async (req, res) => {
+  const id = req.body.id; // Obtém o ID do usuário a partir do corpo da requisição
+
+  try {
+    // Busca o usuário no banco de dados pelo ID
+    const user = await Users.findByPk(id);
+    if (!user) {
+      return res.status(404).send("Usuário não encontrado.");
+    }
+
+    // Verifica se um arquivo de imagem foi enviado
+    if (req.file) {
+      const oldImageName = user.image; // Obtém o nome da imagem antiga do banco de dados
+      const oldImagePath = path.join(
+        __dirname,
+        "../../public/uploads",
+        user.image
+      );
+
+      // Verifica se há uma imagem antiga para ser deletada
+      if (oldImageName) {
+        try {
+          await fs.promises.unlink(oldImagePath); // Deleta a imagem antiga
+          console.log("Imagem antiga deletada com sucesso.");
+        } catch (err) {
+          console.error("Erro ao deletar a imagem antiga:", err);
+        }
+      }
+
+      // Define o nome da nova imagem como original
+      const newImageName = req.file.filename; // Mantém o nome original da imagem
+
+      // Atualiza o campo de imagem no banco de dados
+      user.image = newImageName; // Atualiza com o novo nome
+      await user.save(); // Salva as alterações no banco de dados
+      console.log("Nome da nova imagem atualizado no banco de dados.");
+
+      // Salva a nova imagem no diretório
+      const newImagePath = path.join(
+        __dirname,
+        "../../public/uploads",
+        newImageName
+      );
+    }
+    res.redirect(`/user/${user.name.toLowerCase()}`);
+  } catch (error) {
+    console.error("Erro ao atualizar usuário:", error);
+    res.status(500).send("Erro ao atualizar usuário.");
+  }
+});
 
 router.get(
   "/:fullname/justify/denied/:id",
@@ -17,26 +100,6 @@ router.get(
     res.render("users/justifyDenied.ejs", {
       justifydenied: hour.justifydenied,
     });
-  }
-);
-
-router.get(
-  "/:fullname/justify/:id",
-  adminAuth.authenticateLogin,
-  adminAuth.authenticateLowUser,
-  async (req, res) => {
-    const { id } = req.params;
-    try {
-      const hours = await Hours.findByPk(id);
-      if (hours) {
-        res.render("users/justify.ejs", { justify: hours });
-      } else {
-        res.status(404).send("Record not found");
-      }
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error fetching record");
-    }
   }
 );
 
@@ -66,12 +129,17 @@ router.post(
   async (req, res) => {
     const { date } = req.body;
     const userId = req.session.user.id;
+    const user = await Users.findOne({ where: { id: userId } });
 
+    if (!user) {
+      return res.status(404).send("Usuário não encontrado.");
+    }
     if (!date) {
       return res.status(400).render("users/filtro.ejs", {
         errorMessage: "Por favor, selecione uma data para filtrar.",
         filteredHours: [],
         user: req.session.user,
+        image: user.image,
       });
     }
 
@@ -113,6 +181,7 @@ router.post(
         user: req.session.user,
         errorMessage:
           formattedHours.length === 0 ? "Nenhum dado encontrado." : null,
+        image: user.image,
       });
     } catch (error) {
       console.error("Erro ao buscar os dados:", error);

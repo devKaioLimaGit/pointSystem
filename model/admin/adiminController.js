@@ -3,9 +3,9 @@ const router = express.Router();
 const Users = require("../users/Users");
 const bcryptjs = require("bcryptjs");
 const path = require("path");
-const fs = require("fs");
 const adminAuth = require("../../middlewares/adminAuth");
 const multer = require("multer");
+const fs = require("fs").promises;
 const Hours = require("../hours/Hours");
 const { id } = require("date-fns/locale");
 const { where } = require("sequelize");
@@ -187,20 +187,30 @@ function getNextAvailableNumber(directory) {
   return maxNumber + 1;
 }
 
-// Configuração do armazenamento com Multer
+// Configuração de armazenamento para multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "public/imgUsers"); // Diretório onde os arquivos serão armazenados
+    cb(null, path.join(__dirname, "../../public/uploads"));
   },
   filename: function (req, file, cb) {
-    const ext = ".jpg"; // Definindo a extensão como .jpg
-    const number = getNextAvailableNumber("public/imgUsers"); // Obtém o próximo número disponível
-    cb(null, "image-" + number + ext); // Nome do arquivo com base no próximo número disponível e extensão .jpg
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
-// Inicializa o upload com Multer
-const upload = multer({ storage: storage });
+// Filtro para aceitar apenas imagens
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Apenas imagens são permitidas!"), false);
+  }
+};
+
+// Configuração do upload com multer
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+});
 
 router.post("/save/new", upload.single("image"), async (req, res) => {
   let {
@@ -217,8 +227,7 @@ router.post("/save/new", upload.single("image"), async (req, res) => {
     prohibited,
     exit,
   } = req.body;
-  const image = req.file ? req.file.filename : null; // Obtém o nome do arquivo de imagem
-
+  const image = req.file ? req.file.filename : null;
   name = name.toUpperCase();
   surname = surname.toUpperCase();
   email = email.toLowerCase();
@@ -253,6 +262,7 @@ router.post("/save/new", upload.single("image"), async (req, res) => {
         exit: exit,
         password: hash,
         roles: roles,
+        image: image,
       });
 
       res.redirect("/admin/main");
@@ -265,12 +275,9 @@ router.post("/save/new", upload.single("image"), async (req, res) => {
   }
 });
 
-router.get(
-  "/create/new",
-  async (req, res) => {
-    res.render("admin/new.ejs");
-  }
-);
+router.get("/create/new", async (req, res) => {
+  res.render("admin/new.ejs");
+});
 
 router.get(
   "/delete/:id",
@@ -388,7 +395,7 @@ router.post("/update/:id", async (req, res) => {
   res.render("admin/edit", { user: user });
 });
 
-router.post("/update", async (req, res) => {
+router.post("/update", upload.single("image"), async (req, res) => {
   let {
     id,
     name,
@@ -404,50 +411,75 @@ router.post("/update", async (req, res) => {
     prohibited,
     exit,
   } = req.body;
+
+  console.log(req.body);
+
+  // Convertendo o nome e sobrenome para maiúsculas
   name = name.toUpperCase();
   surname = surname.toUpperCase();
 
-  // Convertendo as datas para o formato normal (DD/MM/YYYY)
+  // Convertendo as datas para o formato DD/MM/YYYY
   prohibited = formatDateToNormal(prohibited);
   exit = formatDateToNormal(exit);
 
   // Regex para formatar o CPF com pontos e traço
-  cpf = cpf.replace(/\D/g, ""); // Remove caracteres não numéricos do CPF
-  cpf = cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4"); // Formatação com pontos e traço
+  cpf = cpf.replace(/\D/g, ""); // Remove caracteres não numéricos
+  cpf = cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
 
   try {
-    if (id) {
-      const hash = password ? bcryptjs.hashSync(password, 10) : undefined;
-
-      await Users.update(
-        {
-          name: name,
-          surname: surname,
-          institution: institution,
-          course: course,
-          period: period,
-          shift: shift,
-          prohibited: prohibited,
-          cpf: cpf,
-          exit: exit,
-          email: email,
-          password: hash,
-          roles: roles,
-        },
-        {
-          where: {
-            id: id,
-          },
-        }
-      );
-
-      res.redirect("/admin/main");
-    } else {
-      res.status(403).send("Você não pode atualizar a si mesmo!");
+    // Busca o usuário pelo ID
+    const user = await Users.findByPk(id);
+    if (!user) {
+      return res.status(404).send("Usuário não encontrado.");
     }
+
+    // Verifica se existe um arquivo de imagem e faz o upload
+    let updatedData = {
+      name,
+      surname,
+      cpf,
+      email,
+      roles,
+      institution,
+      course,
+      period,
+      shift,
+      prohibited,
+      exit,
+    };
+    console.log(req.file);
+    if (req.file) {
+      // Remove a imagem antiga se existir
+      if (user.image) {
+        const oldImagePath = path.join(
+          __dirname,
+          "../../public/uploads",
+          user.image
+        );
+        try {
+          await fs.unlink(oldImagePath); // Deletando a imagem antiga
+          console.log("Imagem antiga deletada com sucesso.");
+        } catch (err) {
+          console.error("Erro ao deletar imagem antiga:", err);
+        }
+      }
+      // Atribui a nova imagem ao campo image
+      updatedData.image = req.file.filename;
+    }
+
+    // Se houver uma nova senha, faz o hash e adiciona ao update
+    if (password) {
+      const hash = bcryptjs.hashSync(password, 10);
+      updatedData.password = hash;
+    }
+
+    // Atualiza os dados do usuário com base no ID
+    await Users.update(updatedData, { where: { id } });
+
+    res.redirect("/admin/main");
   } catch (error) {
     console.error("Erro ao atualizar usuário:", error);
-    res.status(500).send("Erro ao atualizar usuário");
+    res.status(500).send("Erro ao atualizar usuário.");
   }
 });
 
