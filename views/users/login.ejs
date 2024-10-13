@@ -1,30 +1,66 @@
 <%- include('../partials/header.ejs') %>
-<%- include('../partials/navbar.ejs') %>
 
-<body>
-    <div class="container">
-        <hr>
-        <div class="card">
-            <div class="card-header" style="display: flex; flex-direction: column; align-items: center;">
-                <img src="/img/logo.png" alt="" width="40%" height="40%">
+<body id="wrapper">
+  <div class="container">
+    <div class="card">
+      <div
+        class="card-header"
+        style="display: flex; flex-direction: column; align-items: center"
+      >
+        <img src="/img/logo.png" alt="" width="40%" height="40%" />
+      </div>
+      <div class="card-body">
+        <% if (typeof error !== 'undefined') { %>
+        <div class="alert alert-danger"><%= error %></div>
+        <% } %>
+        <div class="login-box">
+          <form action="/user/login/authenticate" method="post">
+            <label>CPF/Email ou Login:</label>
+
+            <div class="input-box">
+              <span class="icon"> <i class="fa-solid fa-user"></i></span>
+              <input
+                style="margin: 10px 0px"
+                class="form-control"
+                type="text"
+                name="cpfOrEmailOrLogin"
+                placeholder="CPF/Email ou Login"
+                id="username"
+              />
             </div>
-            <div class="card-body">
-                <% if (typeof error !== 'undefined') { %>
-                    <div class="alert alert-danger"><%= error %></div>
-                <% } %>
-                <form action="/user/login/authenticate" method="post">
-                    <label>CPF/Email ou Login:</label>
-                    <input style="margin: 10px 0px;" class="form-control" type="text" name="cpfOrEmailOrLogin" placeholder="CPF/Email ou Login">
-                    <label>Senha:</label>
-                    <input style="margin: 10px 0px;" class="form-control" type="password" name="password" placeholder="**********">
-                    <br>
-                    <a style="text-decoration: none;" href="/reset/password">Redefinir Senha</a>
-                    <br>
-                    <br>
-                    <button style="width: 100%;" type="submit" class="btn btn-primary">Login</button>
-                </form>
+            <label>Senha:</label>
+            <div class="input-box">
+              <span class="icon">
+                <i class="fa-solid fa-eye" id="togglePassword"></i>
+                <!-- Ícone de olho -->
+              </span>
+              <input
+                style="margin: 10px 0px"
+                class="form-control"
+                type="password"
+                name="password"
+                id="password"
+                placeholder="**********"
+              />
             </div>
+
+            <br />
+            <a style="text-decoration: none" href="/reset/password"
+              >Redefinir Senha</a
+            >
+            <div class="remenber">
+              <input type="checkbox" id="rememberMe" />
+              <p>Lembre-se de mim</p>
+            </div>
+            <br />
+            <br />
+            <button style="width: 100%" type="submit" class="btn btn-primary">
+              Login
+            </button>
+          </form>
         </div>
+      </div>
     </div>
+  </div>
 </body>
 <%- include('../partials/footer.ejs') %>
