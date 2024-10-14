@@ -10,6 +10,7 @@ const path = require("path");
 const { format } = require("date-fns"); // Adicione a biblioteca date-fns para formatação de data
 const { id } = require("date-fns/locale");
 const fs = require("fs"); // Corrige o erro de 'fs' não definido
+let dataUser;
 
 // Caminho do diretório de uploads
 const uploadDir = path.join(__dirname, "../../public/uploads");
@@ -273,6 +274,10 @@ router.get(
   async (req, res) => {
     const userName = req.params.name;
     const user = await Users.findOne({ where: { name: userName } });
+    console.log(userName)
+    if(userName !== dataUser.name.toLowerCase()){
+      res.redirect("/logout")
+    }
 
     if (user) {
       const hours = await Hours.findAll({
@@ -342,7 +347,7 @@ router.post("/login/authenticate", async (req, res) => {
     const comparison = bcryptjs.compareSync(password, user.password);
 
     if (comparison) {
-      req.session.user = {
+      dataUser = req.session.user = {
         id: user.id,
         name: user.name,
         surname: user.surname,
