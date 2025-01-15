@@ -211,7 +211,9 @@ router.post(
 
 router.post("/hours/request", async (req, res) => {
   try {
-    const { hourId } = req.body;
+    console.log(req.body)
+    const { hourId, geolocation } = req.body;
+    
     const hour = await Hours.findByPk(hourId);
     if (hour) {
       hour.request = true;
@@ -229,9 +231,9 @@ router.post("/hours/request", async (req, res) => {
 });
 
 router.post("/save/time", adminAuth.authenticateLogin, async (req, res) => {
-  const { entradaTime, saidaTime, userId, idAtual } = req.body;
+  const { entradaTime, saidaTime, userId, idAtual,geolocation } = req.body;
 
-  console.log(entradaTime, saidaTime);
+  console.log(entradaTime, saidaTime,geolocation);
 
   try {
     if (entradaTime !== undefined) {
@@ -242,6 +244,7 @@ router.post("/save/time", adminAuth.authenticateLogin, async (req, res) => {
         denied: 0,
         justify: "",
         justifydenied: "",
+        location: geolocation,
         userId: userId,
       });
       console.log("Entrada salva com sucesso.");

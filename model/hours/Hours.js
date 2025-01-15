@@ -30,7 +30,11 @@ const Hours = Connection.define("hours", {
         type: Sequelize.TEXT,
         allowNull: true,
         defaultValue: ""
-    }
+    },
+    location:{
+        type: Sequelize.TEXT,
+        allowNull: true,
+    },
 }, {
     timestamps: true
 });

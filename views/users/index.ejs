@@ -188,19 +188,21 @@ include('../partials/navbaruser.ejs') %>
 <%- include('../partials/footer.ejs') %>
 
 <script>
+  const geolocation = JSON.parse(localStorage.getItem("@geolocation"));
   document.addEventListener("DOMContentLoaded", function () {
     const requestButtons = document.querySelectorAll(".request-button");
 
     requestButtons.forEach((button) => {
       button.addEventListener("click", function () {
         const hourId = this.getAttribute("data-id");
-
+      
+        
         fetch("/user/hours/request", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ hourId: hourId }),
+          body: JSON.stringify({ hourId: hourId}),
         })
           .then((response) => response.json())
           .then((data) => {
@@ -308,6 +310,7 @@ include('../partials/navbaruser.ejs') %>
       body: JSON.stringify({
         entradaTime: entradaTime,
         userId: userId,
+        geolocation: geolocation
       }),
     }).then((response) => {
       if (!response.ok) {
@@ -326,6 +329,7 @@ include('../partials/navbaruser.ejs') %>
       body: JSON.stringify({
         saidaTime: saidaTime,
         idAtual: idAtual,
+        geolocation:geolocation
       }),
     }).then((response) => {
       if (!response.ok) {

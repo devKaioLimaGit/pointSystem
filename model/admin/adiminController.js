@@ -129,6 +129,7 @@ router.post("/schedules/filter", async (req, res) => {
         users,
         selectedUser: user,
         hours: user.hours || [],
+        location: user.hours.location
       });
     } else {
       res.status(404).send("Usuário não encontrado.");

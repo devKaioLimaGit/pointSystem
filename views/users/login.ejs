@@ -14,7 +14,7 @@
         <div class="alert alert-danger"><%= error %></div>
         <% } %>
         <div class="login-box">
-          <form action="/user/login/authenticate" method="post">
+          <form action="/user/login/authenticate" method="post" id="loginForm">
             <label>CPF/Email ou Login:</label>
 
             <div class="input-box">
@@ -54,7 +54,7 @@
             </div>
             <br />
             <br />
-            <button style="width: 100%" type="submit" class="btn btn-primary">
+            <button style="width: 100%" type="submit" class="btn btn-primary" id="loginButton">
               Login
             </button>
           </form>
@@ -62,5 +62,52 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // Função para obter a geolocalização e retornar uma Promise
+    function getGeolocation() {
+      return new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function(position) {
+              // Sucesso - Obter as coordenadas
+              const latitude = position.coords.latitude;
+              const longitude = position.coords.longitude;
+              const linkLocation = `https://www.google.com/maps?q=${latitude},${longitude}`;
+              localStorage.setItem("@geolocation", JSON.stringify(linkLocation));
+              resolve(linkLocation); // Resolve a Promise com a URL de localização
+            },
+            function(error) {
+              reject("Erro ao obter geolocalização: " + error.message); // Rejeita a Promise se ocorrer um erro
+            }
+          );
+        } else {
+          reject("Geolocalização não é suportada neste navegador."); // Rejeita caso o navegador não suporte geolocalização
+        }
+      });
+    }
+
+    // Usar a função de geolocalização e só continuar depois que a localização for obtida
+    getGeolocation()
+      .then(linkLocation => {
+        console.log("Link de localização obtido com sucesso:", linkLocation);
+        // Se a geolocalização foi obtida, habilitar o botão de login
+        document.getElementById("loginButton").disabled = false;
+      })
+      .catch(error => {
+        console.error(error);
+        // Se não for possível obter a geolocalização, mostrar um alerta e bloquear o formulário de login
+        alert("A geolocalização é necessária para continuar. Por favor, ative a geolocalização no seu dispositivo.");
+        
+        // Desabilitar o botão de login
+        document.getElementById("loginButton").disabled = true;
+        
+        // Opcional: esconder o formulário de login ou redirecionar o usuário
+        document.getElementById("loginForm").style.display = 'none'; // Esconde o formulário
+        // Você também pode redirecionar o usuário para outra página
+        // window.location.href = '/geolocation/required'; // Exemplo de redirecionamento
+      });
+  </script>
+
 </body>
 <%- include('../partials/footer.ejs') %>

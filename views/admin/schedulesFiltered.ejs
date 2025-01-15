@@ -31,6 +31,7 @@
                         <th>Saída</th>
                         <th>Justificativa</th>
                         <th>Ação</th>
+                        <th>Localização</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,6 +53,7 @@
                                     <a class="btn btn-warning" href="/admin/adjustment/<%= hour.id %>">Ajustar</a>
                                     <a class="btn btn-danger" href="/admin/deny/<%= hour.id %>">Negar</a>
                                 </td>
+                                <td><a class="btn btn-warning" href="<%= hour.location %>" target="_blank">Localização</a></td>
                             </tr>
                         <% }) %>
                     <% } else { %>
